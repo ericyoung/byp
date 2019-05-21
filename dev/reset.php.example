@@ -1,0 +1,43 @@
+<?php
+
+# $user = "eric";
+# $pass = "eric";
+# $host = "127.0.0.1";
+# $db = "concerts";
+# $url = "/mnt/c/Sites/concerts/application/sql";
+# $url = '/Users/eric/Sites/concerts/application/sql';
+
+// first drop the database
+$command = "mysql --user=".$user." --password='".$pass."' -h ".$host." < ".$url;
+$output = shell_exec($command . '/drop_database.sql'); // . ' /dev/null 2>&1');
+
+// then use the database
+$command = "mysql --user=".$user." --password='".$pass."' -h ".$host." -D ".$db." < ".$url;
+$output = shell_exec($command . '/create_tables.sql');
+$output = shell_exec($command . '/1-seed_data.sql');
+$output = shell_exec($command . '/2-dummy_data.sql');
+$output = shell_exec($command . '/3-data_updates.sql');
+
+// create eric user if password passed as argument
+if(isset($argv[1]) && strlen($argv[1]) > 0) {
+  $password = password_hash($argv[1], PASSWORD_DEFAULT);
+  $conn = mysqli_connect($host, $user, $pass, $db) or die("Database Connection Failed");
+
+  $name = "Eric Young";
+  $email = "youngeric@gmail.com";
+  mysqli_query($conn, "INSERT INTO users(id,name,email,password_hash,company_id,role_id,approved) VALUES(1,'".$name."','".$email."','".$password."',1,2,1)");
+
+
+  $name = "Barry Leff";
+  $email = "youngeric+barry@gmail.com";
+  mysqli_query($conn, "INSERT INTO users(id,name,email,password_hash,company_id,role_id,approved) VALUES(2,'".$name."','".$email."','".$password."',2,8,1)");
+
+  $name = "John Paul";
+  $email = "youngeric+cellar@gmail.com";
+  mysqli_query($conn, "INSERT INTO users(id,name,email,password_hash,company_id,role_id,approved) VALUES(3,'".$name."','".$email."','".$password."',0,8,0)");
+
+
+  mysqli_close($conn);
+}
+
+?>
